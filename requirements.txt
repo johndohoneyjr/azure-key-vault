@@ -1,0 +1,3 @@
+msal
+azure.keyvault
+azure.identity
