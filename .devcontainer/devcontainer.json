@@ -1,5 +1,5 @@
 {
-	"name": "Kubernetes-Hackfest",
+	"name": "Linux-Dev",
 	"dockerFile": "Dockerfile",
 
 	// do not change these if you want Docker in Docker support
