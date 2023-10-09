@@ -1,3 +1,4 @@
 msal
 azure.keyvault
 azure.identity
+azure.storage
