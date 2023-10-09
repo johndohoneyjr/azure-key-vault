@@ -7,6 +7,9 @@ import msal
 import os
 from azure.identity import ClientSecretCredential
 
+from cryptography.fernet import Fernet
+
+key = Fernet.
 
 # Azure setup
 key_vault_name = '<your-key-vault-name>'
@@ -14,7 +17,7 @@ key_name = 'blogdata'
 storage_account_name = 'dohoneystorage'
 container_name = 'blogdata'
 blob_name = 'mflix.json'
-file_path = 'mflix-encrypt.json'
+file_path = 'mflix.json'
 
 client_id = os.environ['CLIENT_ID']
 client_secret = os.environ['CLIENT_SECRET']
@@ -30,8 +33,8 @@ key = key_client.get_key(key_name)
 # Read the file and encrypt it
 with open(file_path, 'rb') as file:
     plaintext = file.read()
-
-ciphertext = key.key.encrypt(
+key.
+ciphertext = key.encrypt(
     plaintext,
     padding.OAEP(
         mgf=padding.MGF1(algorithm=hashes.SHA256()),
