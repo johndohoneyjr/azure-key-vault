@@ -8,4 +8,4 @@ build_property.PlatformNeutralAssembly =
 build_property.EnforceExtendedAnalyzerRules = 
 build_property._SupportedPlatformList = Linux,macOS,Windows
 build_property.RootNamespace = BlobEncryptionKeyVault
-build_property.ProjectDir = /Users/john/Documents/BlueYonder/AzureKeyVault/azure-key-vault/BlobEncryptionKeyVault/
+build_property.ProjectDir = c:\Users\johndohoney\week1113\azure-key-vault\BlobEncryptionKeyVault\
