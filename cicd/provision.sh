@@ -1,15 +1,13 @@
 #!/usr/bin/env bash
 
-set -x
-
 # Environment Variables
 export SUBSCRIPTION_ID=""
-export RESOURCE_GROUP="-blue-yonder-rg"
+export RESOURCE_GROUP="blue-yonder-rg"
 export LOCATION="eastus"
-export SERVICE_PRINCIPAL_NAME="foo-serviceprincipal"
+export SERVICE_PRINCIPAL_NAME="serviceprincipal"
 export GITHUB_REPO="https://github.com/johndohoneyjr/azure-key-vault"
 
-// for alias in WSL - alias expansion needed in scripts, not interactive
+# for alias in WSL - alias expansion needed in scripts, not interactive
 shopt -s expand_aliases
 
 
@@ -23,7 +21,6 @@ echo $RESOURCE_GROUP
 export CUSTOMER_NAME=$customerName
 
 export CUSTOMER=$(echo "$CUSTOMER_NAME" | tr '[:lower:]' '[:upper:]')
-echo $CUSTOMER-CLUSTER_SERVICE_PRINCIPAL
 
 # check for existence of environment variable WSL_DISTRO_NAME
 # Make sure github cli is installed -- for adding the secret to GH Actions
@@ -91,19 +88,51 @@ fi
 echo ""
 echo "Logging you into your account ..."
 az login  ## for CodeSpaces --use-device-code
+az account set --subscription $SUBSCRIPTION_ID
 
 # Create the Resource Group
 echo "Creating resource group - $RESOURCE_GROUP"
 az group create --name $RESOURCE_GROUP --location $LOCATION
 
 echo "Creating Resource Group Scoped Service Principal..."
+export SERVICE_PRINCIPAL_NAME=$CUSTOMER-$SERVICE_PRINCIPAL_NAME
 az ad sp create-for-rbac --name $SERVICE_PRINCIPAL_NAME --role Contributor --scopes /subscriptions/$SUBSCRIPTION_ID/resourceGroups/$RESOURCE_GROUP  --sdk-auth > gh-secret.json
 export clientID=$(cat gh-secret.json | jq -r .clientId)
+export PASSWORD=$(cat gh-secret.json | jq -r .clientSecret)
+export TENANT_ID=$(cat gh-secret.json | jq -r .tenantId)
+export SUB_ID=$(cat gh-secret.json | jq -r .subscriptionId)
 
-echo "Add Api Permissions ... add the graph api with Application.ReadWrite.All, then grant it, and finally consent to it"
-az ad app permission add --id $clientID --api 00000003-0000-0000-c000-000000000000 --api-permissions 1bfefb4e-e0b5-418b-a88f-73c46d2cc8e9=Role
-# The directory needs some propogation time.
-sleep 10
+# Set azure policy to allow for key vault and access policy creation in this resource group
+# echo "Setting Azure Policy to allow for Key Vault and Access Policy creation in this resource group..."
+# az policy assignment create --name 'Deploy Key Vault' --scope /subscriptions/$SUB_ID/resourceGroups/$RESOURCE_GROUP --policy /providers/Microsoft.Authorization/policyDefinitions/4fae8e6a-5c83-4f35-9f8d-9c3838c5ed97 --params "{\"allowedLocations\":{\"value\":[\"$LOCATION\"]}}"
+
+# Create 6 character GUID - no dashes and append it to the vault name
+export GU=$(uuidgen)
+export GUI=$(echo $GU | tr -d "-")
+export GUID=${GUI:0:6}
+export AKV=$CUSTOMER_NAME$GUID
+
+
+echo "Creating Azure Key Vault..."
+az keyvault create --name $AKV --resource-group $RESOURCE_GROUP --location $LOCATION
+# Create a certificate in the keyvault
+# Create a certificate in the keyvault
+echo "Creating a certificate in the keyvault..."
+az keyvault certificate create --vault-name $AKV --name myCert --policy "$(az keyvault certificate get-default-policy)"
+
+
+sleep 5
+
+az role assignment create --role "Key Vault Secrets Officer"  \
+--assignee $clientID \
+--scope /subscriptions/$SUBSCRIPTION_ID/resourceGroups/$RESOURCE_GROUP/providers/Microsoft.KeyVault/vaults/$AKV
+
+az role assignment create --role "Key Vault Secrets Officer"  \
+--assignee $clientID \
+--scope /subscriptions/$SUBSCRIPTION_ID/resourceGroups/$RESOURCE_GROUP
+
+
+echo "az login --service-principal --username $clientID --password $PASSWORD --tenant $TENANT_ID" > $CUSTOMER-login.txt
 
 # Authenticate to Github 
 echo ""
