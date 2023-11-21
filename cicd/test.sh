@@ -10,8 +10,8 @@ az acr delete -n johnldregistry -g uci-blue-yonder-rg
 
 # Create a secret in the keyvault
 
-az keyvault secret set --vault-name uci9267d3 --name "mySecret" --value "myPassword"
+az keyvault secret set --vault-name xxx --name "mySecret" --value "myPassword"
 
 # Create a certificate in the keyvault
 
-az keyvault certificate create --vault-name uci9267d3 --name myCert --policy "$(az keyvault certificate get-default-policy)"
+az keyvault certificate create --vault-name xxx --name myCert --policy "$(az keyvault certificate get-default-policy)"

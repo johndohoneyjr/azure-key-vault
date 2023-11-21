@@ -115,10 +115,6 @@ export AKV=$CUSTOMER_NAME$GUID
 
 echo "Creating Azure Key Vault..."
 az keyvault create --name $AKV --resource-group $RESOURCE_GROUP --location $LOCATION
-# Create a certificate in the keyvault
-# Create a certificate in the keyvault
-echo "Creating a certificate in the keyvault..."
-az keyvault certificate create --vault-name $AKV --name myCert --policy "$(az keyvault certificate get-default-policy)"
 
 
 sleep 5
@@ -126,11 +122,6 @@ sleep 5
 az role assignment create --role "Key Vault Secrets Officer"  \
 --assignee $clientID \
 --scope /subscriptions/$SUBSCRIPTION_ID/resourceGroups/$RESOURCE_GROUP/providers/Microsoft.KeyVault/vaults/$AKV
-
-az role assignment create --role "Key Vault Secrets Officer"  \
---assignee $clientID \
---scope /subscriptions/$SUBSCRIPTION_ID/resourceGroups/$RESOURCE_GROUP
-
 
 echo "az login --service-principal --username $clientID --password $PASSWORD --tenant $TENANT_ID" > $CUSTOMER-login.txt
 
@@ -140,8 +131,8 @@ echo "Logging into Github to set the service principal as a secret for Github ac
 gh auth login
 
 #
-echo "Setting the Service Principal Github Secret for Github Actions automation..."
-gh secret set $CUSTOMER"_CLUSTER_SERVICE_PRINCIPAL" -r $GITHUB_REPO < gh-secret.json
+echo "Setting the Service Principal Github Secret for automation..."
+gh secret set $CUSTOMER"_CLUSTER_SERVICE_PRINCIPAL" -a codespaces -r $GITHUB_REPO < gh-secret.json
 
 if [ $? -eq 0 ]; then
    echo "Displaying the secret file...gh-secret.json, after you add ClientID and Secret, delete file..."
@@ -152,7 +143,14 @@ else
 fi
 
 echo "Setting Subscription ID Github Secret for Github Actions automation..."
-gh secret set  $CUSTOMER"_SUBSCRIPTION_ID" -r $GITHUB_REPO --body $SUBSCRIPTION_ID
+gh secret set  $CUSTOMER"_SUBSCRIPTION_ID" -a codespaces -r $GITHUB_REPO --body $SUBSCRIPTION_ID
 
 echo "Setting Resource Group Name as Github Secret for Github Actions automation..."
-gh secret set  $CUSTOMER"_RESOURCE_GROUP" -r $GITHUB_REPO --body $RESOURCE_GROUP
+gh secret set  $CUSTOMER"_RESOURCE_GROUP"  -a codespaces -r $GITHUB_REPO --body $RESOURCE_GROUP
+
+echo "Setting the Login for client access for client  automation..."
+gh secret set $CUSTOMER"_CLIENT_LOGIN" -a codespaces -r $GITHUB_REPO < $CUSTOMER-login.txt
+
+# Clean up
+rm $CUSTOMER-login.txt
+rm gh-secret.json
