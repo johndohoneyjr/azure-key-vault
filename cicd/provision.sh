@@ -2,7 +2,7 @@
 
 # Environment Variables
 export SUBSCRIPTION_ID=""
-export RESOURCE_GROUP="blue-yonder-rg"
+export RESOURCE_GROUP="blue-rg"
 export LOCATION="eastus"
 export SERVICE_PRINCIPAL_NAME="serviceprincipal"
 export GITHUB_REPO="https://github.com/johndohoneyjr/azure-key-vault"
