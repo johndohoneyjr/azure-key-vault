@@ -67,7 +67,7 @@ using Azure.Security.KeyVault.Certificates;
             BlobClient blob = new BlobServiceClient(blobUri, credential, options).GetBlobContainerClient("blogdata").GetBlobClient("BY-DEMO-ENCRYPTED-BLOB");
 
             // Upload the encrypted contents to the blob
-            Stream blobContent = BinaryData.FromString("Blue Yonder Rocks!!!").ToStream();
+            Stream blobContent = BinaryData.FromString("Blue Fields Rock!!!").ToStream();
 
             // Linux OpenSSL not happy about AESGCM -- Pointed Launch Config at SSL library
 
