@@ -4,9 +4,7 @@ az login --service-principal --username ...
 
 az group create --name mytest-john --location eastus
 
-az acr create -n johnldregistry -g uci-blue-yonder-rg --sku Standard
-
-az acr delete -n johnldregistry -g uci-blue-yonder-rg
+az acr create -n johnldregistry -g uci-blue-rg --sku Standard
 
 # Create a secret in the keyvault
 
